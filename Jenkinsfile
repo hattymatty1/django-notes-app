@@ -7,8 +7,7 @@ pipeline{
                 script{
                     hello()
                 }
-            }
-            
+            }  
         }
         stage("code"){
             steps{
