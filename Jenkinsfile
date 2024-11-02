@@ -12,24 +12,23 @@ pipeline{
         }
         stage("code"){
             steps{
-                echo "this is cloning the code"
-                git url: "https://github.com/hattymatty1/django-notes-app.git", branch: "main"
-                echo "Code Cloning Successful"
+                script{
+                    clone("https://github.com/hattymatty1/django-notes-app.git", "main")
+                }
             }
         }
         stage("build"){
             steps{
-                echo "this is building the code"
-                sh "docker build -t notes-app:latest ."
+                script{
+                    docker_build("notes-app", "latest", "souravk45")
+                }
+                
             }
         }
         stage("Pushing to the DockerHub"){
             steps{
-                echo "this is pushing to the dockerHub"
-                withCredentials([usernamePassword(credentialsId:"DockerHubCred", usernameVariable:"dockerHubUser", passwordVariable:"dockerHubPass")]){
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker image tag notes-app:latest ${env.dockerHubUser}/notes-app:latest"
-                sh "docker push ${env.dockerHubUser}/notes-app:latest"
+                script{
+                    docker_push("notes-app","latest")
                 }
             }
         }
