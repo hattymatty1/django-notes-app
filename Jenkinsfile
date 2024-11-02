@@ -1,44 +1,44 @@
-@Library("Shared") _
+@Library("shared") _
 pipeline{
-    
-    agent { label "vinod"}
-    
+    agent {label "nagu"}
     stages{
-        
         stage("Hello"){
             steps{
                 script{
                     hello()
                 }
             }
+            
         }
-        stage("Code"){
+        stage("code"){
             steps{
-               script{
-                clone("https://github.com/LondheShubham153/django-notes-app.git","main")
-               }
-                
+                echo "this is cloning the code"
+                git url: "https://github.com/hattymatty1/django-notes-app.git", branch: "main"
+                echo "Code Cloning Successful"
             }
         }
-        stage("Build"){
+        stage("build"){
             steps{
-                script{
-                docker_build("notes-app","latest","trainwithshubham")
+                echo "this is building the code"
+                sh "docker build -t notes-app:latest ."
+            }
+        }
+        stage("Pushing to the DockerHub"){
+            steps{
+                echo "this is pushing to the dockerHub"
+                withCredentials([usernamePassword(credentialsId:"DockerHubCred", usernameVariable:"dockerHubUser", passwordVariable:"dockerHubPass")]){
+                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
+                sh "docker image tag notes-app:latest ${env.dockerHubUser}/notes-app:latest"
+                sh "docker push ${env.dockerHubUser}/notes-app:latest"
                 }
             }
         }
-        stage("Push to DockerHub"){
+        stage("deploy"){
             steps{
-                script{
-                    docker_push("notes-app","latest","trainwithshubham")
-                }
+                echo "this is deploying the code"
+                sh "docker compose up -d"
             }
         }
-        stage("Deploy"){
-            steps{
-                echo "This is deploying the code"
-                sh "docker compose down && docker compose up -d"
-            }
-        }
+        
     }
 }
